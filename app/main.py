@@ -6,6 +6,9 @@ from app.websocket import router as websocket_router
 from app.upload import router as upload_router
 from app.control import router as control_router
 
+from app.download import router as download_router
+app.include_router(download_router)
+
 app = FastAPI(
     title="Zippy Receiver",
     version="1.0.0"

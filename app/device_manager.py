@@ -5,54 +5,36 @@ class DeviceManager:
 
     def __init__(self):
 
-        self.devices = {}
+        self.phones = {}
 
-    def add(
-        self,
-        name: str,
-        websocket: WebSocket
-    ):
+        self.receivers = {}
 
-        self.devices[name] = {
-            "socket": websocket
-        }
+    # ---------------- Phones ----------------
 
-    def remove(self, name: str):
+    def add_phone(self, name, websocket):
+        self.phones[name] = websocket
 
-        self.devices.pop(name, None)
+    def remove_phone(self, name):
+        self.phones.pop(name, None)
+
+    # ---------------- Receiver ----------------
+
+    def add_receiver(self, name, websocket):
+        self.receivers[name] = websocket
+
+    def remove_receiver(self, name):
+        self.receivers.pop(name, None)
+
+    # ---------------- Get ----------------
+
+    def get_receiver(self, name):
+        return self.receivers.get(name)
+
+    def get_phone(self, name):
+        return self.phones.get(name)
 
     def names(self):
-
-        return list(self.devices.keys())
-
-    def get(self, name: str):
-
-        return self.devices.get(name)
-
-    async def send(
-        self,
-        name: str,
-        message: dict
-    ):
-
-        device = self.get(name)
-
-        if device is None:
-            return False
-
-        try:
-
-            await device["socket"].send_json(
-                message
-            )
-
-            return True
-
-        except Exception:
-
-            self.remove(name)
-
-            return False
+        return list(self.phones.keys())
 
 
 manager = DeviceManager()
