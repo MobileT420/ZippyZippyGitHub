@@ -6,3 +6,9 @@ venv/
 .vscode/
 .idea/
 *.log
+# Zippy Receiver downloaded backups
+Receiver/downloads/
+Receiver/downloads/**
+
+# Temporary partial downloads
+*.part

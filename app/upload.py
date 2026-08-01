@@ -2,8 +2,6 @@ from fastapi import APIRouter, UploadFile, File, Form
 from pathlib import Path
 import shutil
 from datetime import datetime
-import html
-from datetime import datetime
 from zoneinfo import ZoneInfo
 
 router = APIRouter()
@@ -54,17 +52,15 @@ async def upload_file(
 async def upload_notification(
 
     packageName: str = Form(...),
-
     appName: str = Form(...),
-
     title: str = Form(""),
-
     text: str = Form(""),
-
     time: int = Form(...),
-
     deviceFolder: str = Form(...)
 ):
+
+    import json
+    import uuid
 
     notification_folder = (
         UPLOAD_FOLDER /
@@ -77,111 +73,37 @@ async def upload_notification(
         exist_ok=True
     )
 
-    html_file = notification_folder / "notifications.html"
-
-    if not html_file.exists():
-
-        html_file.write_text(
-            """
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Zippy Notifications</title>
-
-<style>
-
-body{
-    font-family:Arial;
-    background:#f5f5f5;
-    margin:20px;
-}
-
-.card{
-
-    background:white;
-
-    border-radius:10px;
-
-    padding:15px;
-
-    margin-bottom:12px;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.15);
-}
-
-.app{
-
-    color:#1976d2;
-
-    font-weight:bold;
-
-    font-size:18px;
-}
-
-.title{
-
-    margin-top:8px;
-
-    font-weight:bold;
-}
-
-.time{
-
-    margin-top:10px;
-
-    color:gray;
-
-    font-size:12px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h2>Zippy Notification Backup</h2>
-
-</body>
-
-</html>
-""",
-            encoding="utf-8"
-        )
-
-    content = html_file.read_text(
-        encoding="utf-8"
+    # Correct India time
+    dt = datetime.fromtimestamp(
+        time / 1000,
+        ZoneInfo("Asia/Kolkata")
     )
 
-    dt = (
-        datetime
-        .fromtimestamp(time / 1000, ZoneInfo("Asia/Kolkata"))
-        .strftime("%d-%m-%Y %H:%M:%S")
+    notification = {
+        "packageName": packageName,
+        "appName": appName,
+        "title": title,
+        "text": text,
+        "timestamp": time,
+        "time": dt.strftime("%d-%m-%Y %H:%M:%S")
+    }
+
+    # Unique file for every notification
+    filename = (
+        f"{time}_{uuid.uuid4().hex[:8]}.json"
     )
 
-    card = f"""
-<div class="card">
-
-<div class="app">{html.escape(appName)}</div>
-
-<div class="title">{html.escape(title)}</div>
-
-<div>{html.escape(text)}</div>
-
-<div class="time">{dt}</div>
-
-</div>
-
-"""
-
-    content = content.replace(
-        "</body>",
-        card + "\n</body>"
+    notification_file = (
+        notification_folder /
+        filename
     )
 
-    html_file.write_text(
-        content,
+    notification_file.write_text(
+        json.dumps(
+            notification,
+            ensure_ascii=False,
+            indent=2
+        ),
         encoding="utf-8"
     )
 
