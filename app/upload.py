@@ -3,6 +3,8 @@ from pathlib import Path
 import shutil
 from datetime import datetime
 import html
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 router = APIRouter()
 
@@ -152,9 +154,11 @@ body{
         encoding="utf-8"
     )
 
-    dt = datetime.fromtimestamp(
-        time / 1000
-    ).strftime("%d-%m-%Y %H:%M:%S")
+    dt = (
+        datetime
+        .fromtimestamp(time / 1000, ZoneInfo("Asia/Kolkata"))
+        .strftime("%d-%m-%Y %H:%M:%S")
+    )
 
     card = f"""
 <div class="card">
